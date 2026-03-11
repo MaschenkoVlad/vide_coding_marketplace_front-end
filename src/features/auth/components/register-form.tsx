@@ -1,0 +1,170 @@
+'use client'
+
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import Link from 'next/link'
+import { Button } from '@/shared/ui/shadcn/ui/button'
+import { Input } from '@/shared/ui/shadcn/ui/input'
+import { Label } from '@/shared/ui/shadcn/ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/shadcn/ui/card'
+import { useRegister } from '../hooks/use-auth'
+import { AuthRegisterRequest } from '@/shared/types'
+
+const registerSchema = z
+  .object({
+    email: z.string().email('Invalid email address'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string(),
+    username: z.string().min(3, 'Username must be at least 3 characters').optional(),
+    firstName: z.string().min(1, 'First name is required').optional(),
+    lastName: z.string().min(1, 'Last name is required').optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
+
+type RegisterFormData = z.infer<typeof registerSchema>
+
+export function RegisterForm() {
+  const [isLoading, setIsLoading] = useState(false)
+  const register = useRegister()
+
+  const form = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      username: '',
+      firstName: '',
+      lastName: '',
+    },
+  })
+
+  const onSubmit = async (data: RegisterFormData) => {
+    setIsLoading(true)
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { confirmPassword, ...registerData } = data
+      await register.mutateAsync(registerData as AuthRegisterRequest)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <Card className="mx-auto w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Create Account</CardTitle>
+        <CardDescription>Enter your information to create an account</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              {...form.register('email')}
+              disabled={isLoading}
+            />
+            {form.formState.errors.email && (
+              <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First Name</Label>
+              <Input
+                id="firstName"
+                type="text"
+                placeholder="First name"
+                {...form.register('firstName')}
+                disabled={isLoading}
+              />
+              {form.formState.errors.firstName && (
+                <p className="text-sm text-destructive">{form.formState.errors.firstName.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                id="lastName"
+                type="text"
+                placeholder="Last name"
+                {...form.register('lastName')}
+                disabled={isLoading}
+              />
+              {form.formState.errors.lastName && (
+                <p className="text-sm text-destructive">{form.formState.errors.lastName.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="username">Username (optional)</Label>
+            <Input
+              id="username"
+              type="text"
+              placeholder="Choose a username"
+              {...form.register('username')}
+              disabled={isLoading}
+            />
+            {form.formState.errors.username && (
+              <p className="text-sm text-destructive">{form.formState.errors.username.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Create a password"
+              {...form.register('password')}
+              disabled={isLoading}
+            />
+            {form.formState.errors.password && (
+              <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="Confirm your password"
+              {...form.register('confirmPassword')}
+              disabled={isLoading}
+            />
+            {form.formState.errors.confirmPassword && (
+              <p className="text-sm text-destructive">{form.formState.errors.confirmPassword.message}</p>
+            )}
+          </div>
+
+          {register.error && (
+            <p className="text-sm text-destructive">{register.error.message || 'Registration failed'}</p>
+          )}
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Creating account...' : 'Create Account'}
+          </Button>
+        </form>
+
+        <div className="mt-4 text-center text-sm">
+          <span className="text-muted-foreground">Already have an account? </span>
+          <Link href="/login" className="text-primary hover:underline">
+            Sign in
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
