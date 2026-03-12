@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { QueryProvider } from '@/shared/lib/query-client'
+import { AuthProvider } from '@/shared/contexts/auth-context'
 import { Header } from '@/shared/ui/app/header'
 import { Footer } from '@/shared/ui/app/footer'
 import { Toaster } from '@/shared/ui/shadcn/ui/toaster'
@@ -18,12 +19,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={inter.className}>
         <QueryProvider>
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-          <Toaster />
+          <AuthProvider>
+            <div className="flex min-h-screen flex-col">
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+            <Toaster />
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

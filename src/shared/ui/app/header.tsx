@@ -1,12 +1,25 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/shared/ui/shadcn/ui/button'
-import { useCurrentUser } from '@/features/auth/hooks/use-auth'
+import { useCurrentUser } from '@/shared/hooks/use-current-user'
+import { useAuthActions } from '@/shared/hooks/use-auth'
 import { ShoppingCart, User, LogOut, Package } from 'lucide-react'
 
 export function Header() {
-  const { data: user, isLoading } = useCurrentUser()
+  const { user, isLoading } = useCurrentUser()
+  const { logout } = useAuthActions()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      router.push('/')
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -39,10 +52,10 @@ export function Header() {
               <Link href="/profile">
                 <Button variant="ghost" size="sm">
                   <User className="mr-2 h-4 w-4" />
-                  {user.username || user.email}
+                  {user.firstName || user.email}
                 </Button>
               </Link>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>

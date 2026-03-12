@@ -29,7 +29,7 @@ class ApiClient {
     this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  protected async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`
     const config: RequestInit = {
       headers: {
@@ -99,3 +99,4 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient()
+export { ApiClient }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -9,7 +10,8 @@ import { Button } from '@/shared/ui/shadcn/ui/button'
 import { Input } from '@/shared/ui/shadcn/ui/input'
 import { Label } from '@/shared/ui/shadcn/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/shadcn/ui/card'
-import { useLogin } from '../hooks/use-auth'
+import { useAuthActions } from '@/shared/hooks/use-auth'
+import { Alert, AlertDescription } from '@/shared/ui/shadcn/ui/alert'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -20,7 +22,11 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
-  const login = useLogin()
+  const [error, setError] = useState<string | null>(null)
+  const { login } = useAuthActions()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next')
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -32,8 +38,15 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
+    setError(null)
+
     try {
-      await login.mutateAsync(data)
+      await login(data.email, data.password)
+      const redirectUrl = next || '/'
+      router.push(redirectUrl)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed'
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -77,7 +90,11 @@ export function LoginForm() {
             )}
           </div>
 
-          {login.error && <p className="text-sm text-destructive">{login.error.message || 'Login failed'}</p>}
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Signing in...' : 'Sign In'}

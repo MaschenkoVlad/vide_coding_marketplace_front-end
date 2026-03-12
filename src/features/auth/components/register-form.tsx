@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -9,17 +10,17 @@ import { Button } from '@/shared/ui/shadcn/ui/button'
 import { Input } from '@/shared/ui/shadcn/ui/input'
 import { Label } from '@/shared/ui/shadcn/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/shadcn/ui/card'
-import { useRegister } from '../hooks/use-auth'
-import { AuthRegisterRequest } from '@/shared/types'
+import { useAuthActions } from '@/shared/hooks/use-auth'
+import { Alert, AlertDescription } from '@/shared/ui/shadcn/ui/alert'
 
 const registerSchema = z
   .object({
     email: z.string().email('Invalid email address'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
     confirmPassword: z.string(),
-    username: z.string().min(3, 'Username must be at least 3 characters').optional(),
     firstName: z.string().min(1, 'First name is required').optional(),
     lastName: z.string().min(1, 'Last name is required').optional(),
+    role: z.enum(['BUYER', 'SELLER']).default('BUYER'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -30,7 +31,11 @@ type RegisterFormData = z.infer<typeof registerSchema>
 
 export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false)
-  const register = useRegister()
+  const [error, setError] = useState<string | null>(null)
+  const { register: registerUser } = useAuthActions()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next')
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -38,18 +43,25 @@ export function RegisterForm() {
       email: '',
       password: '',
       confirmPassword: '',
-      username: '',
       firstName: '',
       lastName: '',
+      role: 'BUYER',
     },
   })
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true)
+    setError(null)
+
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...registerData } = data
-      await register.mutateAsync(registerData as AuthRegisterRequest)
+      await registerUser(registerData)
+      const redirectUrl = next || '/'
+      router.push(redirectUrl)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed'
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -108,16 +120,18 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="username">Username (optional)</Label>
-            <Input
-              id="username"
-              type="text"
-              placeholder="Choose a username"
-              {...form.register('username')}
+            <Label htmlFor="role">Account Type</Label>
+            <select
+              id="role"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              {...form.register('role')}
               disabled={isLoading}
-            />
-            {form.formState.errors.username && (
-              <p className="text-sm text-destructive">{form.formState.errors.username.message}</p>
+            >
+              <option value="BUYER">Buyer - I want to purchase hardware</option>
+              <option value="SELLER">Seller - I want to sell hardware</option>
+            </select>
+            {form.formState.errors.role && (
+              <p className="text-sm text-destructive">{form.formState.errors.role.message}</p>
             )}
           </div>
 
@@ -149,8 +163,10 @@ export function RegisterForm() {
             )}
           </div>
 
-          {register.error && (
-            <p className="text-sm text-destructive">{register.error.message || 'Registration failed'}</p>
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
