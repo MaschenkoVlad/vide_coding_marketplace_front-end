@@ -7,8 +7,8 @@ on:
     branches: [main, master, develop]
 
 jobs:
-  lint:
-    name: Lint
+  ci:
+    name: CI Checks
     runs-on: ubuntu-latest
 
     steps:
@@ -29,59 +29,11 @@ jobs:
       - name: Run Prettier check
         run: npx prettier --check .
 
-  typecheck:
-    name: Type Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
       - name: Run TypeScript check
         run: npm run typecheck
 
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
       - name: Run tests
         run: npm run test
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Build application
         run: npm run build
