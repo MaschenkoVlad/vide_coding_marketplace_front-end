@@ -1,10 +1,10 @@
-import { cn } from '@/shared/lib/utils'
-import { ReactNode } from 'react'
+import React from 'react';
+import { cn } from '@/shared/lib/utils';
 
 interface PageContainerProps {
-  children: ReactNode
-  className?: string
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  children: React.ReactNode;
+  className?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
 }
 
 const sizeClasses = {
@@ -12,8 +12,9 @@ const sizeClasses = {
   md: 'max-w-4xl',
   lg: 'max-w-6xl',
   xl: 'max-w-7xl',
-}
+  full: 'max-w-full',
+};
 
-export function PageContainer({ children, className, size = 'lg' }: PageContainerProps) {
-  return <div className={cn('container mx-auto px-4 py-8', sizeClasses[size], className)}>{children}</div>
-}
+export const PageContainer: React.FC<PageContainerProps> = ({ children, className, size = 'lg' }) => {
+  return <div className={cn('container mx-auto px-4 py-8', sizeClasses[size], className)}>{children}</div>;
+};
