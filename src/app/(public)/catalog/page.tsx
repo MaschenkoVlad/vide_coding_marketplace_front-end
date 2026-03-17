@@ -1,16 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
-import { PageContainer } from '@/shared/ui/app/PageContainer';
-import { EmptyState } from '@/shared/ui/app/EmptyState';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { PageContainer } from '@/shared/ui/app/page-container';
+import { EmptyState } from '@/shared/ui/app/empty-state';
 import { Skeleton } from '@/shared/ui/shadcn/ui/skeleton';
 import { CatalogFilters } from '@/features/catalog-filters/components/CatalogFilters';
 import { ListingCard } from '@/entities/listing/components/ListingCard';
 import { useListingsQuery } from '@/features/listings/api/useListingsQuery';
 import {
-  serializeFilters,
+  createQueryString,
   getFiltersFromURL,
   hasActiveFilters,
 } from '@/features/catalog-filters/lib/filter-serialization';
@@ -28,14 +27,38 @@ export default function CatalogPage() {
   const [filters, setFilters] = useState<ListingFilters>(initialFilters);
   const [pagination, setPagination] = useState<PaginationParams>(initialPagination);
 
-  // Update URL when filters or pagination change
-  useEffect(() => {
-    const queryString = serializeFilters(filters, pagination);
-    const url = queryString ? `/catalog?${queryString}` : '/catalog';
-    router.push(url, { scroll: false });
-  }, [filters, pagination, router]);
+  // Unified handler for updating URL with new state
+  const updateURL = useCallback(
+    (newFilters: ListingFilters, newPagination: PaginationParams) => {
+      const queryString = createQueryString(newFilters, newPagination);
+      const url = queryString ? `/catalog?${queryString}` : '/catalog';
+      router.push(url, { scroll: false });
+    },
+    [router]
+  );
 
-  // Update URL when search params change (browser navigation)
+  // Handle filter changes
+  const handleFiltersChange = useCallback(
+    (newFilters: ListingFilters) => {
+      const newPagination = { ...pagination, page: 1 }; // Reset to first page when filters change
+      setFilters(newFilters);
+      setPagination(newPagination);
+      updateURL(newFilters, newPagination);
+    },
+    [pagination, updateURL]
+  );
+
+  // Handle pagination changes
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      const newPagination = { ...pagination, page: newPage };
+      setPagination(newPagination);
+      updateURL(filters, newPagination);
+    },
+    [filters, pagination, updateURL]
+  );
+
+  // Handle browser navigation (back/forward)
   useEffect(() => {
     const { filters: urlFilters, pagination: urlPagination } = getFiltersFromURL(searchParams);
     setFilters(urlFilters);
@@ -46,15 +69,6 @@ export default function CatalogPage() {
     ...filters,
     ...pagination,
   });
-
-  const handleFiltersChange = (newFilters: ListingFilters) => {
-    setFilters(newFilters);
-    setPagination({ ...pagination, page: 1 }); // Reset to first page when filters change
-  };
-
-  const handlePageChange = (newPage: number) => {
-    setPagination({ ...pagination, page: newPage });
-  };
 
   // Loading state
   if (isLoading && !data) {

@@ -1,31 +1,31 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuthState } from '../shared/hooks/use-auth'
-import { useCurrentUser } from '../shared/hooks/use-current-user'
-import { Skeleton } from '../shared/ui/shadcn/ui/skeleton'
-import { Alert, AlertDescription } from '../shared/ui/shadcn/ui/alert'
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthState } from '../shared/hooks/use-auth';
+import { useCurrentUser } from '../shared/hooks/use-current-user';
+import { Skeleton } from '../shared/ui/shadcn/ui/skeleton';
+import { Alert, AlertDescription } from '../shared/ui/shadcn/ui/alert';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode
-  requiredRole?: 'BUYER' | 'SELLER' | 'ADMIN'
-  fallbackPath?: string
+  children: React.ReactNode;
+  requiredRole?: 'BUYER' | 'SELLER' | 'ADMIN';
+  fallbackPath?: string;
 }
 
 export function ProtectedRoute({ children, requiredRole, fallbackPath = '/login' }: ProtectedRouteProps) {
-  const router = useRouter()
-  const { isAuthenticated, isLoading: authLoading } = useAuthState()
-  const { user, isLoading: userLoading, isError } = useCurrentUser()
+  const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading } = useAuthState();
+  const { user, isLoading: userLoading, isError } = useCurrentUser();
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      const currentPath = window.location.pathname
-      const redirectUrl = `${fallbackPath}?next=${encodeURIComponent(currentPath)}`
-      router.push(redirectUrl)
-      return
+      const currentPath = window.location.pathname;
+      const redirectUrl = `${fallbackPath}?next=${encodeURIComponent(currentPath)}`;
+      router.push(redirectUrl);
+      return;
     }
-  }, [authLoading, isAuthenticated, router, fallbackPath])
+  }, [authLoading, isAuthenticated, router, fallbackPath]);
 
   if (authLoading || userLoading) {
     return (
@@ -41,11 +41,11 @@ export function ProtectedRoute({ children, requiredRole, fallbackPath = '/login'
           <Skeleton className="h-4 w-4/5" />
         </div>
       </div>
-    )
+    );
   }
 
   if (!isAuthenticated) {
-    return null
+    return null;
   }
 
   if (isError) {
@@ -57,7 +57,7 @@ export function ProtectedRoute({ children, requiredRole, fallbackPath = '/login'
           </AlertDescription>
         </Alert>
       </div>
-    )
+    );
   }
 
   if (requiredRole && user?.role !== requiredRole) {
@@ -67,10 +67,10 @@ export function ProtectedRoute({ children, requiredRole, fallbackPath = '/login'
           <AlertDescription>Access denied. This page requires {requiredRole} privileges.</AlertDescription>
         </Alert>
       </div>
-    )
+    );
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
 
 export function withAuth<P extends object>(
@@ -82,6 +82,6 @@ export function withAuth<P extends object>(
       <ProtectedRoute {...options}>
         <Component {...props} />
       </ProtectedRoute>
-    )
-  }
+    );
+  };
 }
