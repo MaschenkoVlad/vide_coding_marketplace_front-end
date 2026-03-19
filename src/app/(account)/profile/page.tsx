@@ -1,9 +1,11 @@
-import { PageContainer } from '@/shared/ui/app/page-container'
-import { EmptyState } from '@/shared/ui/app/empty-state'
-import { User } from 'lucide-react'
-import { ProtectedRoute } from '@/components/protected-route'
+import { PageContainer } from '@/shared/ui/app/page-container';
+import { ProtectedRoute } from '@/components/protected-route';
+import { ProfileForm } from '@/features/profile/components/ProfileForm';
+import { useCurrentUser } from '@/shared/hooks/use-current-user';
 
 export default function ProfilePage() {
+  const { user } = useCurrentUser();
+
   return (
     <ProtectedRoute>
       <PageContainer>
@@ -13,13 +15,9 @@ export default function ProfilePage() {
             <p className="text-muted-foreground">Manage your account and marketplace activity</p>
           </div>
 
-          <EmptyState
-            icon={<User className="h-12 w-12" />}
-            title="Profile Coming Soon"
-            description="We're working on your profile dashboard. You'll soon be able to manage your listings, orders, and account settings here."
-          />
+          <ProfileForm user={user} />
         </div>
       </PageContainer>
     </ProtectedRoute>
-  )
+  );
 }
