@@ -1,56 +1,60 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import Link from 'next/link'
-import { Button } from '@/shared/ui/shadcn/ui/button'
-import { Input } from '@/shared/ui/shadcn/ui/input'
-import { Label } from '@/shared/ui/shadcn/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/shadcn/ui/card'
-import { useAuthActions } from '@/shared/hooks/use-auth'
-import { Alert, AlertDescription } from '@/shared/ui/shadcn/ui/alert'
+import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import Link from 'next/link';
+import { Button } from '@/shared/ui/shadcn/ui/button';
+import { Input } from '@/shared/ui/shadcn/ui/input';
+import { Label } from '@/shared/ui/shadcn/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/shadcn/ui/card';
+import { useAuthActions } from '@/shared/hooks/use-auth';
+import { Alert, AlertDescription } from '@/shared/ui/shadcn/ui/alert';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-})
+});
 
-type LoginFormData = z.infer<typeof loginSchema>
+type LoginFormData = z.infer<typeof loginSchema>;
+
+const defaultValues: LoginFormData = {
+  email: '',
+  password: '',
+};
 
 export function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const { login } = useAuthActions()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const next = searchParams.get('next')
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { login } = useAuthActions();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next');
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  })
+    defaultValues,
+  });
 
   const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      await login(data.email, data.password)
-      const redirectUrl = next || '/'
-      router.push(redirectUrl)
+      await login(data.email, data.password);
+      const redirectUrl = next || '/';
+      router.push(redirectUrl);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Login failed'
-      setError(errorMessage)
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setError(errorMessage);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+
+  const errors = form.formState.errors;
 
   return (
     <Card className="mx-auto w-full max-w-md">
@@ -71,9 +75,7 @@ export function LoginForm() {
               {...form.register('email')}
               disabled={isLoading}
             />
-            {form.formState.errors.email && (
-              <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
-            )}
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -85,9 +87,7 @@ export function LoginForm() {
               {...form.register('password')}
               disabled={isLoading}
             />
-            {form.formState.errors.password && (
-              <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
-            )}
+            {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
           </div>
 
           {error && (
@@ -109,5 +109,5 @@ export function LoginForm() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import Link from 'next/link'
-import { Button } from '@/shared/ui/shadcn/ui/button'
-import { Input } from '@/shared/ui/shadcn/ui/input'
-import { Label } from '@/shared/ui/shadcn/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/shadcn/ui/card'
-import { useAuthActions } from '@/shared/hooks/use-auth'
-import { Alert, AlertDescription } from '@/shared/ui/shadcn/ui/alert'
+import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import Link from 'next/link';
+import { Button } from '@/shared/ui/shadcn/ui/button';
+import { Input } from '@/shared/ui/shadcn/ui/input';
+import { Label } from '@/shared/ui/shadcn/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/shadcn/ui/card';
+import { useAuthActions } from '@/shared/hooks/use-auth';
+import { Alert, AlertDescription } from '@/shared/ui/shadcn/ui/alert';
 
 const registerSchema = z
   .object({
@@ -25,47 +25,51 @@ const registerSchema = z
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ['confirmPassword'],
-  })
+  });
 
-type RegisterFormData = z.infer<typeof registerSchema>
+type RegisterFormData = z.infer<typeof registerSchema>;
+
+const defaultValues: RegisterFormData = {
+  email: '',
+  password: '',
+  confirmPassword: '',
+  firstName: '',
+  lastName: '',
+  role: 'BUYER',
+};
 
 export function RegisterForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const { register: registerUser } = useAuthActions()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const next = searchParams.get('next')
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { register: registerUser } = useAuthActions();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next');
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-      confirmPassword: '',
-      firstName: '',
-      lastName: '',
-      role: 'BUYER',
-    },
-  })
+    defaultValues,
+  });
 
   const onSubmit = async (data: RegisterFormData) => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { confirmPassword, ...registerData } = data
-      await registerUser(registerData)
-      const redirectUrl = next || '/'
-      router.push(redirectUrl)
+      const { confirmPassword, ...registerData } = data;
+      await registerUser(registerData);
+      const redirectUrl = next || '/';
+      router.push(redirectUrl);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Registration failed'
-      setError(errorMessage)
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
+      setError(errorMessage);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+
+  const errors = form.formState.errors;
 
   return (
     <Card className="mx-auto w-full max-w-md">
@@ -84,9 +88,7 @@ export function RegisterForm() {
               {...form.register('email')}
               disabled={isLoading}
             />
-            {form.formState.errors.email && (
-              <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
-            )}
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -99,9 +101,7 @@ export function RegisterForm() {
                 {...form.register('firstName')}
                 disabled={isLoading}
               />
-              {form.formState.errors.firstName && (
-                <p className="text-sm text-destructive">{form.formState.errors.firstName.message}</p>
-              )}
+              {errors.firstName && <p className="text-sm text-destructive">{errors.firstName.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -113,9 +113,7 @@ export function RegisterForm() {
                 {...form.register('lastName')}
                 disabled={isLoading}
               />
-              {form.formState.errors.lastName && (
-                <p className="text-sm text-destructive">{form.formState.errors.lastName.message}</p>
-              )}
+              {errors.lastName && <p className="text-sm text-destructive">{errors.lastName.message}</p>}
             </div>
           </div>
 
@@ -130,9 +128,7 @@ export function RegisterForm() {
               <option value="BUYER">Buyer - I want to purchase hardware</option>
               <option value="SELLER">Seller - I want to sell hardware</option>
             </select>
-            {form.formState.errors.role && (
-              <p className="text-sm text-destructive">{form.formState.errors.role.message}</p>
-            )}
+            {errors.role && <p className="text-sm text-destructive">{errors.role.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -144,9 +140,7 @@ export function RegisterForm() {
               {...form.register('password')}
               disabled={isLoading}
             />
-            {form.formState.errors.password && (
-              <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
-            )}
+            {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -158,9 +152,7 @@ export function RegisterForm() {
               {...form.register('confirmPassword')}
               disabled={isLoading}
             />
-            {form.formState.errors.confirmPassword && (
-              <p className="text-sm text-destructive">{form.formState.errors.confirmPassword.message}</p>
-            )}
+            {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>}
           </div>
 
           {error && (
@@ -182,5 +174,5 @@ export function RegisterForm() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
