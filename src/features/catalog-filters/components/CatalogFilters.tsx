@@ -46,7 +46,9 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({ filters, onFilte
   }, [filters]);
 
   const updateFilter = (key: keyof ListingFilters, value: string | number | undefined) => {
-    const newFilters = { ...localFilters, [key]: value };
+    // Treat 'all' as undefined for category and condition filters
+    const processedValue = (key === 'category' || key === 'condition') && value === 'all' ? undefined : value;
+    const newFilters = { ...localFilters, [key]: processedValue };
     setLocalFilters(newFilters);
     onFiltersChange(newFilters);
   };
@@ -80,15 +82,12 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({ filters, onFilte
         {/* Category Filter */}
         <div className="space-y-2">
           <Label htmlFor="category">Category</Label>
-          <Select
-            value={localFilters.category || ''}
-            onValueChange={(value) => updateFilter('category', value || undefined)}
-          >
+          <Select value={localFilters.category || 'all'} onValueChange={(value) => updateFilter('category', value)}>
             <SelectTrigger>
               <SelectValue placeholder="All categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All categories</SelectItem>
+              <SelectItem value="all">All categories</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.value} value={category.value}>
                   {category.label}
@@ -104,14 +103,14 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({ filters, onFilte
         <div className="space-y-2">
           <Label htmlFor="condition">Condition</Label>
           <Select
-            value={localFilters.condition || ''}
-            onValueChange={(value) => updateFilter('condition', (value as ListingCondition) || undefined)}
+            value={localFilters.condition || 'all'}
+            onValueChange={(value) => updateFilter('condition', value as ListingCondition)}
           >
             <SelectTrigger>
               <SelectValue placeholder="All conditions" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All conditions</SelectItem>
+              <SelectItem value="all">All conditions</SelectItem>
               {conditions.map((condition) => (
                 <SelectItem key={condition.value} value={condition.value}>
                   {condition.label}

@@ -1,22 +1,27 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import { QueryProvider } from '@/shared/lib/query-client'
-import { AuthProvider } from '@/shared/contexts/auth-context'
-import { Header } from '@/shared/ui/app/header'
-import { Footer } from '@/shared/ui/app/footer'
-import { Toaster } from '@/shared/ui/shadcn/ui/toaster'
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { QueryProvider } from '@/shared/lib/query-client';
+import { AuthProvider } from '@/shared/contexts/auth-context';
+import { Header } from '@/shared/ui/app/header';
+import { Footer } from '@/shared/ui/app/footer';
+import { Toaster } from '@/shared/ui/shadcn/ui/toaster';
+import { ClientOnly } from '@/shared/ui/client-only';
+import { validateEnvironment } from '@/shared/lib/env-validation';
 
-const inter = Inter({ subsets: ['latin'] })
+// Validate environment variables on app startup
+validateEnvironment();
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'VIDE Coding Marketplace',
   description: 'A marketplace for used computer hardware',
-}
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <QueryProvider>
           <AuthProvider>
@@ -25,10 +30,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <main className="flex-1">{children}</main>
               <Footer />
             </div>
-            <Toaster />
+            <ClientOnly>
+              <Toaster />
+            </ClientOnly>
           </AuthProvider>
         </QueryProvider>
       </body>
     </html>
-  )
+  );
 }
