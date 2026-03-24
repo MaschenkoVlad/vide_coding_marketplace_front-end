@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import { PageContainer } from '@/shared/ui/app/page-container'
-import { Button } from '@/shared/ui/shadcn/ui/button'
-import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/shadcn/ui/card'
-import { Cpu, Monitor, HardDrive, Package, ArrowRight } from 'lucide-react'
+import { PageContainer } from '@/shared/ui/app/page-container';
+import { Button } from '@/shared/ui/shadcn/ui/button';
+import Link from 'next/link';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/shadcn/ui/card';
+import { Cpu, Monitor, HardDrive, Package, ArrowRight } from 'lucide-react';
 
 const categories = [
   { name: 'CPU', icon: Cpu, description: 'Processors and CPUs' },
   { name: 'GPU', icon: Monitor, description: 'Graphics cards' },
   { name: 'Storage', icon: HardDrive, description: 'SSDs, HDDs, and more' },
   { name: 'All Components', icon: Package, description: 'Browse all categories' },
-]
+];
 
 export default function HomePage() {
   return (
@@ -90,5 +90,5 @@ export default function HomePage() {
         </div>
       </div>
     </PageContainer>
-  )
+  );
 }

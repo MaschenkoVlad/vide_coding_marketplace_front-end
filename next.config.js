@@ -4,6 +4,22 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
-}
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.dicebear.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
