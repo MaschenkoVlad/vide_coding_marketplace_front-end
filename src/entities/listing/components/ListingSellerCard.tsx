@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from '@/shared/ui/shadcn/ui/card';
 import { Button } from '@/shared/ui/shadcn/ui/button';
 import { Badge } from '@/shared/ui/shadcn/ui/badge';
 import { MessageCircle, MapPin, Star } from 'lucide-react';
+import { BuyNowButton } from '@/features/checkout/components/BuyNowButton';
 import type { User } from '@/shared/api/types';
 
 interface ListingSellerCardProps {
@@ -16,6 +17,7 @@ interface ListingSellerCardProps {
   };
   currentUserId?: string;
   listingId: string;
+  listingPrice: number;
   className?: string;
 }
 
@@ -23,6 +25,8 @@ export const ListingSellerCard: React.FC<ListingSellerCardProps> = ({
   seller,
   location,
   currentUserId,
+  listingId,
+  listingPrice,
   className = '',
 }) => {
   const isOwnListing = currentUserId === seller.id;
@@ -92,8 +96,17 @@ export const ListingSellerCard: React.FC<ListingSellerCardProps> = ({
 
         {/* Action Buttons */}
         <div className="space-y-2 pt-2">
+          {/* Buy Now Button - only shown to non-sellers */}
+          <BuyNowButton
+            listingId={listingId}
+            listingPrice={listingPrice}
+            sellerId={seller.id}
+            currentUserId={currentUserId}
+            className="w-full"
+          />
+
           {!isOwnListing ? (
-            <Button onClick={handleMessageSeller} className="w-full" size="sm">
+            <Button onClick={handleMessageSeller} className="w-full" size="sm" variant="outline">
               <MessageCircle className="mr-2 h-4 w-4" />
               Message Seller
             </Button>
