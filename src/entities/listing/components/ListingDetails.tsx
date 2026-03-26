@@ -92,6 +92,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, current
           location={listing.location}
           currentUserId={currentUserId}
           listingId={listing.id}
+          listingPrice={listing.price}
         />
 
         {/* Safety Tips */}
